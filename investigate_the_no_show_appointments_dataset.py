@@ -26,6 +26,54 @@ df = pd.read_csv('KaggleV2-May-2016.csv')
 
 df.shape
 
+"""## Cleaning the Data"""
+
+df.isnull().sum()
+
+df.dropna(how='any',inplace=True)
+df.info()
+
+#AppointmentID, PatientID, scheduledDay, AppointmentDay are not in the right format, 
+#we need to format their data types.
+
+to_date =['AppointmentDay','ScheduledDay']
+for data in to_date:
+    df[data] = df[data].apply(pd.to_datetime).dt.date
+    df[data] =df[data].apply(pd.to_datetime)
+
+to_str = ['PatientId','AppointmentID']
+for string in to_str:
+    df[string] = df[string].astype('str')
+ 
+
+df.info()
+
+df.duplicated().sum()
+df.drop_duplicates(inplace=True)
+
+row = df.iloc[0]
+df = df.append(row)
+df.duplicated().sum()
+
+###check statistical properties of all numeric variables.
+df.describe()
+
+sns.boxplot(x='Age',data = df);
+
+##115 is the oldest age and is realistic according to human existence.
+def outlier(df,age):
+    q1 = df['Age'].quantile(0.25)
+    q3 = df['Age'].quantile(0.75)
+    IQR = q3-q1
+    df = df.loc[~((df['Age'] < (q1 -1.5 * IQR))| (df['Age'] < (q3 +1.5 * IQR))),]
+    return df
+outlier(df,'Age')
+
+#to drop (-1) in age as it is unrealistic.
+df.query('Age == -1')
+df.drop(df.query('Age == -1').index, inplace = True)
+df['Age'].describe()
+
 # Printing out column names in data
 df.columns
 
